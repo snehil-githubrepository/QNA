@@ -3,37 +3,37 @@ import {
   Button,
   Container,
   Grid,
-  TextField,
   Typography,
-  Paper,
   Card,
   CardContent,
   List,
   ListItem,
   ListItemText,
-  CssBaseline, // Add CssBaseline to reset browser-specific styles
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
-import PeopleIcon from "@mui/icons-material/People";
 import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
-
-const QUESTIONS = [];
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
 export const Landing = () => {
-  const [questions, setQuestions] = useState([]);
-  const [newQuestion, setNewQuestion] = useState("");
   const [userUpvotedQuestions, setUserUpvotedQuestions] = useState([]);
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const sampleQuestions = [
+    { id: 1, text: "How can I use React?", upvotes: 10 },
+    { id: 2, text: "What is the best UI framework?", upvotes: 15 },
+    { id: 3, text: "What is the best KI framework?", upvotes: 123 },
+    {
+      id: 4,
+      text: "https://chat.openai.com/c/79708665-b260-4e0a-80df-536938fb7659",
+      upvotes: 125,
+    },
+    { id: 5, text: "What is the best PI framework?", upvotes: 11 },
+    // Add more sample questions or load from an API/database
+  ];
 
-  const handleQuestionSubmit = () => {
-    if (newQuestion.trim() !== "") {
-      const updatedQuestions = [
-        ...questions,
-        { id: Date.now(), text: newQuestion, upvotes: 0 },
-      ];
-      setQuestions(updatedQuestions);
-      setNewQuestion("");
-      QUESTIONS.push({ id: Date.now(), text: newQuestion, upvotes: 0 }); // Update the global QUESTIONS array
-    }
-  };
+  const [questions, setQuestions] = useState(sampleQuestions);
 
   const handleUpvote = (question) => {
     if (!userUpvotedQuestions.includes(question.id)) {
@@ -44,12 +44,6 @@ export const Landing = () => {
       setQuestions(updatedQuestions);
       setUserUpvotedQuestions((prevUpvoted) => [...prevUpvoted, question.id]);
     }
-  };
-
-  const buttonStyle = {
-    marginLeft: "auto",
-    background: "#4caf50", // Green background color for upvoted button
-    color: "white", // White text color for upvoted button
   };
 
   const parseLinks = (text) => {
@@ -66,76 +60,129 @@ export const Landing = () => {
     );
   };
 
+  const isAdmin = true;
+
+  const sortedQuestions = [...questions].sort((a, b) => b.upvotes - a.upvotes);
+
+  const handleDeleteAllChats = () => {
+    // Open the confirmation dialog
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteAllChats = () => {
+    // Implement the logic to delete all questions here
+    // For this example, we'll simply set the questions array to an empty array
+    setQuestions([]);
+    // Close the confirmation dialog
+    setDeleteDialogOpen(false);
+  };
+
+  const cancelDeleteAllChats = () => {
+    // Close the confirmation dialog without deleting
+    setDeleteDialogOpen(false);
+  };
+
   return (
     <Container>
-      <CssBaseline /> {/* Apply a baseline CSS reset */}
       <Typography variant="h2" align="center" gutterBottom>
-        Q&A Website
+        Admin Dashboard
       </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Paper elevation={3}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="Ask a question"
-              value={newQuestion}
-              onChange={(e) => setNewQuestion(e.target.value)}
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12}>
+
+      <Grid item xs={12}>
+        <Typography variant="h5">
+          Questions:
           <Button
             variant="contained"
-            color="primary"
-            onClick={handleQuestionSubmit}
+            color="secondary"
+            style={{ marginLeft: "10px", backgroundColor: "#ff0000" }} // Red background color
+            onClick={handleDeleteAllChats}
           >
-            Submit
+            Delete all Chat
           </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography variant="h5">Questions:</Typography>
-          <List>
-            {questions.map((question) => (
-              <div key={question.id}>
-                <Card variant="outlined" style={{ marginBottom: "16px" }}>
-                  <CardContent>
-                    <ListItem>
-                      <QuestionAnswerIcon
-                        color="primary"
-                        style={{ marginRight: "15" }}
-                      />
-                      <ListItemText
-                        primary={
-                          <Typography
-                            variant="body1"
-                            style={{ fontSize: "18px" }}
-                          >
-                            {parseLinks(question.text)}
-                          </Typography>
-                        }
-                      />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleUpvote(question)}
-                        disabled={userUpvotedQuestions.includes(question.id)}
-                        style={
-                          userUpvotedQuestions.includes(question.id)
-                            ? buttonStyle
-                            : null
-                        }
-                      >
-                        <PeopleIcon style={{ marginRight: "4px" }} />(
-                        {question.upvotes})
-                      </Button>
-                    </ListItem>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
-          </List>
-        </Grid>
+        </Typography>
+        <Dialog open={isDeleteDialogOpen}>
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            Are you sure you want to delete all chats? This action cannot be
+            undone.
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={cancelDeleteAllChats} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={confirmDeleteAllChats} color="primary">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <List>
+          {sortedQuestions.map((question) => (
+            <div key={question.id}>
+              <Card variant="outlined" style={{ marginBottom: "16px" }}>
+                <CardContent>
+                  <ListItem>
+                    <QuestionAnswerIcon
+                      color="primary"
+                      style={{ marginRight: 15 }}
+                    />
+                    <ListItemText
+                      primary={
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            background: userUpvotedQuestions.includes(
+                              question.id
+                            )
+                              ? "#4caf50"
+                              : "inherit",
+                            color: userUpvotedQuestions.includes(question.id)
+                              ? "white"
+                              : "inherit",
+                          }}
+                        >
+                          <div>
+                            <Typography
+                              variant="body1"
+                              style={{ fontSize: "18px" }}
+                            >
+                              {parseLinks(question.text)}
+                            </Typography>
+                          </div>
+                          <div>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handleUpvote(question)}
+                              disabled={
+                                userUpvotedQuestions.includes(question.id) ||
+                                isAdmin
+                              }
+                              style={{
+                                backgroundColor: userUpvotedQuestions.includes(
+                                  question.id
+                                )
+                                  ? "#4caf50"
+                                  : "#90EE90",
+                                pointerEvents: "none",
+                              }}
+                            >
+                              <ThumbUpIcon />
+                            </Button>
+                            <span style={{ marginLeft: "4px" }}>
+                              {question.upvotes}
+                            </span>
+                          </div>
+                        </div>
+                      }
+                    />
+                  </ListItem>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </List>
       </Grid>
     </Container>
   );
