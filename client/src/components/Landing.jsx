@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
   Container,
   Grid,
-  IconButton,
   TextField,
   Typography,
   Paper,
@@ -12,9 +11,9 @@ import {
   List,
   ListItem,
   ListItemText,
-  Divider,
+  CssBaseline, // Add CssBaseline to reset browser-specific styles
 } from "@mui/material";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import PeopleIcon from "@mui/icons-material/People";
 import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
 
 const QUESTIONS = [];
@@ -22,41 +21,57 @@ const QUESTIONS = [];
 export const Landing = () => {
   const [questions, setQuestions] = useState([]);
   const [newQuestion, setNewQuestion] = useState("");
-  const [userUpvotes, setUserUpvotes] = useState({});
+  const [userUpvotedQuestions, setUserUpvotedQuestions] = useState([]);
 
   const handleQuestionSubmit = () => {
     if (newQuestion.trim() !== "") {
       const updatedQuestions = [
         ...questions,
-        { text: newQuestion, upvotes: 0 },
+        { id: Date.now(), text: newQuestion, upvotes: 0 },
       ];
       setQuestions(updatedQuestions);
       setNewQuestion("");
-      QUESTIONS.push({ text: newQuestion, upvotes: 0 }); // Update the global QUESTIONS array
+      QUESTIONS.push({ id: Date.now(), text: newQuestion, upvotes: 0 }); // Update the global QUESTIONS array
     }
   };
 
-  const handleUpvote = (index) => {
-    if (!userUpvotes[index]) {
-      const updatedQuestions = [...questions];
-      updatedQuestions[index].upvotes += 1;
+  const handleUpvote = (question) => {
+    if (!userUpvotedQuestions.includes(question.id)) {
+      const updatedQuestions = questions.map((q) =>
+        q.id === question.id ? { ...q, upvotes: q.upvotes + 1 } : q
+      );
+      updatedQuestions.sort((a, b) => b.upvotes - a.upvotes);
       setQuestions(updatedQuestions);
-      setUserUpvotes({ ...userUpvotes, [index]: true });
+      setUserUpvotedQuestions((prevUpvoted) => [...prevUpvoted, question.id]);
     }
+  };
+
+  const buttonStyle = {
+    marginLeft: "auto",
+    background: "#4caf50", // Green background color for upvoted button
+    color: "white", // White text color for upvoted button
+  };
+
+  const parseLinks = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, index) =>
+      urlRegex.test(part) ? (
+        <a key={index} href={part} target="_blank" rel="noopener noreferrer">
+          {part}
+        </a>
+      ) : (
+        part
+      )
+    );
   };
 
   return (
     <Container>
-      <Card style={{ backgroundColor: "#4169E1", margin: 15 }}>
-        <Typography
-          variant="h2"
-          align="center"
-          style={{ fontFamily: "cursive" }}
-          gutterBottom
-        >
-          QNA Website
-        </Typography>
-      </Card>
+      <CssBaseline /> {/* Apply a baseline CSS reset */}
+      <Typography variant="h2" align="center" gutterBottom>
+        Q&A Website
+      </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Paper elevation={3}>
@@ -81,32 +96,42 @@ export const Landing = () => {
         <Grid item xs={12}>
           <Typography variant="h5">Questions:</Typography>
           <List>
-            {questions.map((question, index) => (
-              <div key={index}>
-                <ListItem>
-                  <QuestionAnswerIcon
-                    color="primary"
-                    style={{ margin: "15" }}
-                  />
-                  <ListItemText
-                    primary={
-                      <Typography variant="body1" style={{ fontSize: "18px" }}>
-                        {question.text}
-                      </Typography>
-                    }
-                  />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleUpvote(index)}
-                    disabled={userUpvotes[index]}
-                    style={{ marginLeft: "auto" }}
-                  >
-                    <ThumbUpIcon style={{ marginRight: "4px" }} />
-                    Upvote ({question.upvotes})
-                  </Button>
-                </ListItem>
-                {index !== questions.length - 1 && <Divider />}
+            {questions.map((question) => (
+              <div key={question.id}>
+                <Card variant="outlined" style={{ marginBottom: "16px" }}>
+                  <CardContent>
+                    <ListItem>
+                      <QuestionAnswerIcon
+                        color="primary"
+                        style={{ marginRight: "15" }}
+                      />
+                      <ListItemText
+                        primary={
+                          <Typography
+                            variant="body1"
+                            style={{ fontSize: "18px" }}
+                          >
+                            {parseLinks(question.text)}
+                          </Typography>
+                        }
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleUpvote(question)}
+                        disabled={userUpvotedQuestions.includes(question.id)}
+                        style={
+                          userUpvotedQuestions.includes(question.id)
+                            ? buttonStyle
+                            : null
+                        }
+                      >
+                        <PeopleIcon style={{ marginRight: "4px" }} />(
+                        {question.upvotes})
+                      </Button>
+                    </ListItem>
+                  </CardContent>
+                </Card>
               </div>
             ))}
           </List>

@@ -1,14 +1,21 @@
-import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Signin } from "./components/Signin";
 import { Signup } from "./components/Signup";
 import { Landing } from "./components/Landing";
+import { CssBaseline } from "@mui/material";
+import "./App.css"; // Make sure this path is correct
 
 function App() {
   return (
     <div
-      style={{ width: "100vw", height: "100vh", backgroundColor: "#B0E0E6" }}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        margin: 0,
+        backgroundColor: "#b0e0e6",
+      }}
     >
+      <CssBaseline />
       <Router>
         <Routes>
           <Route path={"/signin"} element={<Signin />} />
