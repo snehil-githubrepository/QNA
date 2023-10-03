@@ -11,12 +11,22 @@ import {
   List,
   ListItem,
   ListItemText,
-  CssBaseline, // Add CssBaseline to reset browser-specific styles
+  CssBaseline,
 } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
+import { io } from "socket.io-client";
 
-const QUESTIONS = [];
+const socket = io("http://127.0.0.1:8000/");
+
+const initialQuestion = {
+  ques: "",
+  username: "",
+  id: 0,
+  upvotes: 0,
+  upvoters: [],
+  answered: false,
+};
 
 export const Landing = () => {
   const [questions, setQuestions] = useState([]);
@@ -27,11 +37,17 @@ export const Landing = () => {
     if (newQuestion.trim() !== "") {
       const updatedQuestions = [
         ...questions,
-        { id: Date.now(), text: newQuestion, upvotes: 0 },
+        {
+          id: Date.now(),
+          ques: newQuestion, // Updated to use the 'ques' property
+          username: "", // You can update 'username' as needed
+          upvotes: 0,
+          upvoters: [],
+          answered: false,
+        },
       ];
       setQuestions(updatedQuestions);
       setNewQuestion("");
-      QUESTIONS.push({ id: Date.now(), text: newQuestion, upvotes: 0 }); // Update the global QUESTIONS array
     }
   };
 
@@ -48,8 +64,8 @@ export const Landing = () => {
 
   const buttonStyle = {
     marginLeft: "auto",
-    background: "#4caf50", // Green background color for upvoted button
-    color: "white", // White text color for upvoted button
+    background: "#4caf50",
+    color: "white",
   };
 
   const parseLinks = (text) => {
@@ -68,7 +84,7 @@ export const Landing = () => {
 
   return (
     <Container>
-      <CssBaseline /> {/* Apply a baseline CSS reset */}
+      <CssBaseline />
       <Typography variant="h2" align="center" gutterBottom>
         Q&A Website
       </Typography>
@@ -111,7 +127,8 @@ export const Landing = () => {
                             variant="body1"
                             style={{ fontSize: "18px" }}
                           >
-                            {parseLinks(question.text)}
+                            {parseLinks(question.ques)}{" "}
+                            {/* Updated to use 'ques' */}
                           </Typography>
                         }
                       />
