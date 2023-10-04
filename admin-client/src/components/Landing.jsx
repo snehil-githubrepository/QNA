@@ -26,7 +26,7 @@ export const Landing = () => {
     { id: 3, text: "What is the best KI framework?", upvotes: 123 },
     {
       id: 4,
-      text: "https://chat.openai.com/c/79708665-b260-4e0a-80df-536938fb7659",
+      text: "https://chat.openai.com/",
       upvotes: 125,
     },
     { id: 5, text: "What is the best PI framework?", upvotes: 11 },
