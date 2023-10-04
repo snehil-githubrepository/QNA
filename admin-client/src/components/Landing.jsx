@@ -69,6 +69,14 @@ export const Landing = () => {
     setDeleteDialogOpen(true);
   };
 
+  const handleQuestionDelete = (questionId) => {
+    // Filter out the question with the specified ID
+    const updatedQuestions = questions.filter(
+      (question) => question.id !== questionId
+    );
+    setQuestions(updatedQuestions);
+  };
+
   const confirmDeleteAllChats = () => {
     // Implement the logic to delete all questions here
     // For this example, we'll simply set the questions array to an empty array
@@ -170,9 +178,22 @@ export const Landing = () => {
                             >
                               <ThumbUpIcon />
                             </Button>
-                            <span style={{ marginLeft: "4px" }}>
+                            <span style={{ margin: "8px" }}>
                               {question.upvotes}
                             </span>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => {
+                                handleQuestionDelete(question.id);
+                              }}
+                              style={{
+                                backgroundColor: "blue",
+                                marginRight: "8px",
+                              }}
+                            >
+                              Answered
+                            </Button>
                           </div>
                         </div>
                       }
