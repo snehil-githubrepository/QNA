@@ -30,6 +30,10 @@ export const Landing = () => {
       upvotes: 125,
     },
     { id: 5, text: "What is the best PI framework?", upvotes: 11 },
+    { id: 6, text: "What is the best PI framework?", upvotes: 11 },
+    { id: 7, text: "What is the best PI framework?", upvotes: 11 },
+    { id: 8, text: "What is the best PI framework?", upvotes: 11 },
+    { id: 9, text: "What is the best PI framework?", upvotes: 11 },
     // Add more sample questions or load from an API/database
   ];
 

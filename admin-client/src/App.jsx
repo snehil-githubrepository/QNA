@@ -10,9 +10,7 @@ function App() {
     <div
       style={{
         width: "100vw",
-        height: "100vh",
         margin: 0,
-        backgroundColor: "#b0e0e6",
       }}
     >
       <CssBaseline />
