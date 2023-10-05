@@ -3,7 +3,7 @@ import { Signin } from "./components/Signin";
 import { Signup } from "./components/Signup";
 import { Landing } from "./components/Landing";
 import { CssBaseline } from "@mui/material";
-import "./App.css"; // Make sure this path is correct
+import "./App.css";
 
 function App() {
   return (
@@ -12,7 +12,6 @@ function App() {
         width: "100vw",
         height: "100vh",
         margin: 0,
-        backgroundColor: "#b0e0e6",
       }}
     >
       <CssBaseline />
