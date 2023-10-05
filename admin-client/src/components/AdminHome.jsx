@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Container,
@@ -16,28 +16,46 @@ import {
 } from "@mui/material";
 import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import { io } from "socket.io-client";
 
-export const Landing = () => {
+const socket = io("http://127.0.0.1:8000/");
+
+export const AdminHome = () => {
   const [userUpvotedQuestions, setUserUpvotedQuestions] = useState([]);
-  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const sampleQuestions = [
-    { id: 1, text: "How can I use React?", upvotes: 10 },
-    { id: 2, text: "What is the best UI framework?", upvotes: 15 },
-    { id: 3, text: "What is the best KI framework?", upvotes: 123 },
-    {
-      id: 4,
-      text: "https://chat.openai.com/",
-      upvotes: 125,
-    },
-    { id: 5, text: "What is the best PI framework?", upvotes: 11 },
-    { id: 6, text: "What is the best PI framework?", upvotes: 11 },
-    { id: 7, text: "What is the best PI framework?", upvotes: 11 },
-    { id: 8, text: "What is the best PI framework?", upvotes: 11 },
-    { id: 9, text: "What is the best PI framework?", upvotes: 11 },
-    // Add more sample questions or load from an API/database
-  ];
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false); //confirmation for deleting
+  const [refreshInterval, setRefreshInterval] = useState(null);
+  const [questions, setQuestions] = useState([]);
 
-  const [questions, setQuestions] = useState(sampleQuestions);
+  useEffect(() => {
+    // Request questions from the server when the component mounts
+    socket.emit("getQuestions");
+
+    // Listen for questions from the server
+    socket.on("sampleQuestions", (receivedQuestions) => {
+      // Filter out questions with 'answered' set to 'true'
+      const unansweredQuestions = receivedQuestions.filter(
+        (question) => !question.answered
+      );
+
+      // Update the questions state with the unanswered questions
+      setQuestions(unansweredQuestions);
+    });
+
+    // Set up a refresh interval to periodically request questions
+    const intervalId = setInterval(() => {
+      socket.emit("getQuestions");
+    }, 5000); // Fetch questions every 5 seconds (adjust as needed)
+
+    // Store the interval ID to clear it when the component unmounts
+    setRefreshInterval(intervalId);
+
+    // Clean up the interval when the component unmounts
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, []);
 
   const handleUpvote = (question) => {
     if (!userUpvotedQuestions.includes(question.id)) {
@@ -50,6 +68,7 @@ export const Landing = () => {
     }
   };
 
+  // For listing links in the texts
   const parseLinks = (text) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const parts = text.split(urlRegex);
@@ -68,31 +87,32 @@ export const Landing = () => {
 
   const sortedQuestions = [...questions].sort((a, b) => b.upvotes - a.upvotes);
 
+  /* ------------------------------------------------------------------------------- */
   const handleDeleteAllChats = () => {
     // Open the confirmation dialog
     setDeleteDialogOpen(true);
   };
 
   const handleQuestionDelete = (questionId) => {
-    // Filter out the question with the specified ID
+    // delete specific question
     const updatedQuestions = questions.filter(
       (question) => question.id !== questionId
     );
+    socket.emit("markQuestionAsAnswered", questionId);
     setQuestions(updatedQuestions);
   };
 
   const confirmDeleteAllChats = () => {
-    // Implement the logic to delete all questions here
-    // For this example, we'll simply set the questions array to an empty array
-    setQuestions([]);
-    // Close the confirmation dialog
+    setQuestions([]); //deleted all the questions
     setDeleteDialogOpen(false);
   };
 
   const cancelDeleteAllChats = () => {
-    // Close the confirmation dialog without deleting
+    //cancel on confirmation dialog
     setDeleteDialogOpen(false);
   };
+
+  /* ------------------------------------------------------------------------------- */
 
   return (
     <Container>
